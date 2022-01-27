@@ -2,32 +2,95 @@ const UserModel = require("../models/user-model");
 const bcript = require("bcrypt");
 const uuid = require("uuid");
 const UserDto = require("../dtos/user-dto");
+const { collection } = require("../models/user-model");
+const ItemServise = require("../service/item-service");
+const userModel = require("../models/user-model");
 
 class UserService {
-
   async registration(email, password, name) {
+    try {
+      const candidate = await UserModel.findOne({ email });
 
-    const candidate = await UserModel.findOne({ email });
-    if (candidate) {
-      throw new Error(`Пользователь с таким адресом ${email} уже существует`);
+      if (candidate) {
+        throw new Error(`Пользователь с таким адресом ${email} уже существует`);
+      }
+
+      const hashPassword = await bcript.hash(password, 3);
+
+      const user = await UserModel.create({
+        collections: [],
+        email,
+        password: hashPassword,
+        name,
+        role: ["user"],
+        setting: { theme: "black", language: "en" },
+      });
+      const userDto = new UserDto(user);
+      return { user: userDto };
+    } catch (e) {
+      return e.message;
     }
-    const hashPassword = await bcript.hash(password, 3);
-  
-    const user = await UserModel.create({
-      email,
-      password: hashPassword,
-      name,
-    });
-
-   
-    const userDto = new UserDto(user);
-    
-    
-    return { user: userDto };
   }
-  async getAllUsers (){
-    const  users = await UserModel.find()
-    return users
+  async getAllUsers() {
+    const users = await UserModel.find();
+    return users;
+  }
+  async login(email, password) {
+    try {
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+        throw new Error("Пользователь не найден.");
+      }
+      const isPassEquals = await bcript.compare(password, user.password);
+      if (!isPassEquals) {
+        throw new Error("Неверный пароль.");
+      }
+      return user;
+    } catch (e) {
+      return e.message;
+    }
+  }
+  async createItem(item, _id) {
+    try {
+      const itemObj = {
+       
+        content: item,
+        likes: [],
+        comments: [],
+        tags: [],
+        date: new Date(),
+      };
+      const user = await UserModel.findById({ _id: _id })
+        .updateOne({'collections.collectionName': "2"}, {'$push': {'collections.$.items': itemObj}});
+       
+      return user;
+    } catch (e) {}
+  }
+
+  async createCollection(collectionName, description, _id, img, collectionId) {
+    try {
+      const item = {
+        collectionName: collectionName,
+        img: img,
+        description: description,
+        items: [],
+        date: new Date(),
+        id: collectionId
+      };
+      const user = await UserModel.findOneAndUpdate({_id: _id}, {
+        $push: { collections: item },
+      });
+      console.log(_id)
+      return user;
+    } catch (e) {}
+  }
+  async getUser(_id){
+    try{
+      const user = await UserModel.findById(_id)
+      return user
+    }catch(e){
+
+    }
   }
 }
 
