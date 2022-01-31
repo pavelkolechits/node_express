@@ -1,10 +1,6 @@
 const UserModel = require("../models/user-model");
 const bcript = require("bcrypt");
-const uuid = require("uuid");
 const UserDto = require("../dtos/user-dto");
-const { collection } = require("../models/user-model");
-const ItemServise = require("../service/item-service");
-const userModel = require("../models/user-model");
 
 class UserService {
   async registration(email, password, name) {
@@ -50,19 +46,21 @@ class UserService {
       return e.message;
     }
   }
-  async createItem(item, _id) {
+  async createItem(item, _id, collectionId, itemId) {
     try {
       const itemObj = {
-       
         content: item,
         likes: [],
         comments: [],
         tags: [],
         date: new Date(),
+        id: itemId,
       };
-      const user = await UserModel.findById({ _id: _id })
-        .updateOne({'collections.collectionName': "2"}, {'$push': {'collections.$.items': itemObj}});
-       
+      const user = await UserModel.findById({ _id: _id }).updateOne(
+        { "collections.id": collectionId },
+        { $push: { "collections.$.items": itemObj } }
+      );
+
       return user;
     } catch (e) {}
   }
@@ -75,22 +73,23 @@ class UserService {
         description: description,
         items: [],
         date: new Date(),
-        id: collectionId
+        id: collectionId,
       };
-      const user = await UserModel.findOneAndUpdate({_id: _id}, {
-        $push: { collections: item },
-      });
-      console.log(_id)
+      const user = await UserModel.findOneAndUpdate(
+        { _id: _id },
+        {
+          $push: { collections: item },
+        }
+      );
+      
       return user;
     } catch (e) {}
   }
-  async getUser(_id){
-    try{
-      const user = await UserModel.findById(_id)
-      return user
-    }catch(e){
-
-    }
+  async getUser(_id) {
+    try {
+      const user = await UserModel.findById(_id);
+      return user;
+    } catch (e) {}
   }
 }
 

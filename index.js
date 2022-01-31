@@ -4,22 +4,34 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const router = require("./router/index");
+const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 
-const corsOptions ={
-  origin: process.env.CLIENT_URL, 
-  credentials:true,            
-  optionSuccessStatus:200,
-}
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    parameterLimit: 100000,
+    extended: true,
+  })
+);
 
-app.use(cors({
-  corsOptions
-}));
+const corsOptions = {
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+
+app.use(
+  cors({
+    corsOptions,
+  })
+);
+// app.options("*", cors());
 app.use("/api", router);
 
 const start = async () => {

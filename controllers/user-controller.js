@@ -1,7 +1,7 @@
 const userService = require("../service/user-service");
 
 class UserController {
-  async registration(req, res, next) {
+  async registration(req, res) {
     try {
       const { name, email, password } = req.body;
 
@@ -13,7 +13,7 @@ class UserController {
       return res.json(e);
     }
   }
-  async login(req, res, next) {
+  async login(req, res) {
     try {
       const { email, password } = req.body;
 
@@ -25,34 +25,38 @@ class UserController {
     }
   }
 
-  async getUsers(req, res, next) {
+  async getUsers(req, res) {
     try {
       const users = await userService.getAllUsers();
       return res.json(users);
     } catch (e) {}
   }
-  async createItem(req, res, next) {
+  async createItem(req, res) {
     try {
-      const { item, _id } = req.body;
-      const user = await userService.createItem(item, _id);
+      const { item, _id, collectionId, itemId } = req.body;
+      const user = await userService.createItem(
+        item,
+        _id,
+        collectionId,
+        itemId
+      );
       return res.json(user);
     } catch (e) {}
   }
-  async createCollection(req, res, next) {
+  async createCollection(req, res) {
     try {
-      const { collectionName, description, _id, img ,collectionId} = req.body;
+      const { collectionName, description, _id, img, collectionId } = req.body;
       const collection = await userService.createCollection(
         collectionName,
         description,
         _id,
         img,
-        collectionId,
+        collectionId
       );
-     console.log(_id)
       return res.json(collection);
     } catch (e) {}
   }
-  async getUser(req, res, next) {
+  async getUser(req, res) {
     try {
       const { _id } = req.body;
       const user = await userService.getUser(_id);
