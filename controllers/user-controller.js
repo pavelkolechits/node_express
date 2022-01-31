@@ -31,9 +31,10 @@ class UserController {
       return res.json(users);
     } catch (e) {}
   }
-  async createItem(req, res) {
+  async createItem(req, res, ) {
     try {
       const { item, _id, collectionId, itemId } = req.body;
+      console.log(itemId)
       const user = await userService.createItem(
         item,
         _id,
